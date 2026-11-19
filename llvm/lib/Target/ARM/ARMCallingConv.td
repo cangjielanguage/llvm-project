@@ -274,6 +274,12 @@ def CSR_CangjieGC
     : CalleeSavedRegs<(add LR, SP, (sequence "R%u", 12, 1),
                       (sequence "D%u", 31, 0))>;
 
+// CangjieGC calls may go through a PLT entry or linker veneer that clobbers
+// R12 (IP) before the callee can save it. Exclude R12 from the caller's
+// preserved mask, but keep the callee save list unchanged so the callee still
+// preserves its incoming R12 value.
+def CSR_CangjieGC_NoIP : CalleeSavedRegs<(sub CSR_CangjieGC, R12)>;
+
 // The Windows Control Flow Guard Check function preserves the same registers as
 // AAPCS, and also preserves all floating point registers.
 def CSR_Win_AAPCS_CFGuard_Check : CalleeSavedRegs<(add LR, R11, R10, R9, R8, R7,

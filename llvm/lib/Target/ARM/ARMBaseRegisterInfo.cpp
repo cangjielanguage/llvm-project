@@ -143,7 +143,7 @@ ARMBaseRegisterInfo::getCallPreservedMask(const MachineFunction &MF,
                                 : CSR_AAPCS_SwiftTail_RegMask;
   }
   if (CC == CallingConv::CangjieGC)
-    return CSR_CangjieGC_RegMask;
+    return CSR_CangjieGC_NoIP_RegMask;
   if (STI.getTargetLowering()->supportSwiftError() &&
       MF.getFunction().getAttributes().hasAttrSomewhere(Attribute::SwiftError))
     return STI.isTargetDarwin() ? CSR_iOS_SwiftError_RegMask
