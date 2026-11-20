@@ -902,6 +902,7 @@ static bool insertCJTBAA(Function &F) {
       }
       case Intrinsic::cj_gcwrite_static_ref:
       case Intrinsic::cj_gcwrite_struct:
+      case Intrinsic::cj_maybe_local_write_struct:
       case Intrinsic::cj_array_copy_ref:
       case Intrinsic::cj_array_copy_struct:
         // 1: Dst Operand for these

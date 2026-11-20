@@ -1796,7 +1796,9 @@ void StructLiveAnalysis::visitMemoryIntrinsic(
     break;
   }
   // cj.gcwrite.struct(AS(1) *basePtr, AS(1) *dstPtr, anyAS *srcPtr, size)
-  case Intrinsic::cj_gcwrite_struct: {
+  // cj.maybe.local.write.struct has the same operand layout.
+  case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct: {
     uint64_t MemSize = 0;
     if (auto Size = dyn_cast<ConstantInt>(getSize(II))) {
       MemSize = Size->getZExtValue();

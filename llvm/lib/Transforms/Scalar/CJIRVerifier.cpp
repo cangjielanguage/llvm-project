@@ -229,6 +229,7 @@ public:
       break;
     }
     case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct:
     case Intrinsic::cj_gcread_struct: {
       // The size should not be 0.
       auto *SizeArg = dyn_cast<ConstantInt>(getSize(&Call));

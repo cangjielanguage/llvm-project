@@ -855,6 +855,7 @@ private:
     case Intrinsic::masked_store:
     case Intrinsic::cj_gcwrite_ref:
     case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct:
     case Intrinsic::cj_gcread_ref:
     case Intrinsic::cj_gcread_static_ref:
       return true;
