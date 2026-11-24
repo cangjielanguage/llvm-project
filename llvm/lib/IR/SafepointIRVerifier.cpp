@@ -1022,6 +1022,7 @@ Instruction *llvm::createStoreOrMems(CallBase *CI, IRBuilder<> &Builder) {
     CI->replaceAllUsesWith(NewInst);
     break;
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
   case Intrinsic::cj_gcread_struct:
   case Intrinsic::cj_gcwrite_static_struct:
   case Intrinsic::cj_gcread_static_struct:

@@ -314,6 +314,7 @@ static ArrayRef<unsigned> untrackedAliasArgs(Intrinsic::ID Id) {
     // The plain-IR form of the same content-copy hazard: arg1 = source.
     return Arg1;
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
     return Arg2; // arg2 = source
   case Intrinsic::cj_gcread_struct:
     return Args12; // arg1/arg2 = source side
@@ -2280,6 +2281,7 @@ private:
         handleGCWriteStatic(II);
         return true;
       case Intrinsic::cj_gcwrite_struct:
+      case Intrinsic::cj_maybe_local_write_struct:
         handleGCWriteAgg(II, false);
         return true;
       case Intrinsic::cj_gcwrite_static_struct:
@@ -3816,6 +3818,7 @@ public:
         handleGCWriteStatic(II);
         return true;
       case Intrinsic::cj_gcwrite_struct:
+      case Intrinsic::cj_maybe_local_write_struct:
         handleGCWriteAgg(II, false);
         return true;
       case Intrinsic::cj_gcwrite_static_struct:
