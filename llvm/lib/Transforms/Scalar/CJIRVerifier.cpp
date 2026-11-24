@@ -288,6 +288,8 @@ public:
       case Intrinsic::cj_malloc_local_object:
       case Intrinsic::cj_malloc_array:
       case Intrinsic::cj_malloc_array_generic:
+      case Intrinsic::cj_malloc_local_array:
+      case Intrinsic::cj_malloc_local_array_generic:
       case Intrinsic::cj_division_check_sdiv:
       case Intrinsic::cj_division_check_udiv:
       case Intrinsic::cj_division_check_srem:
