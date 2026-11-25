@@ -27,6 +27,7 @@ Value *getBaseObj(const CallBase *CI) {
   case Intrinsic::cj_gcwrite_ref:
     return CI->getArgOperand(GCWriteRef::BaseObj);
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
     return CI->getArgOperand(GCWriteStruct::BaseObj);
   case Intrinsic::cj_gcread_ref:
     return CI->getArgOperand(GCReadRef::BaseObj);
@@ -73,6 +74,7 @@ Value *getDest(const CallBase *CI) {
     report_fatal_error("Unsupported intrinsic type");
     return nullptr;
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
     return CI->getArgOperand(GCWriteStruct::Dst);
   case Intrinsic::cj_gcwrite_static_struct:
     return CI->getArgOperand(GCWriteStaticStruct::Dst);
@@ -100,6 +102,7 @@ Value *getSource(const CallBase *CI) {
     report_fatal_error("Unsupported intrinsic type");
     return nullptr;
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
     return CI->getArgOperand(GCWriteStruct::Src);
   case Intrinsic::cj_gcwrite_static_struct:
     return CI->getArgOperand(GCWriteStaticStruct::Src);
@@ -127,6 +130,7 @@ Value *getSize(const CallBase *CI) {
     report_fatal_error("Unsupported intrinsic type");
     return nullptr;
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
     return CI->getArgOperand(GCWriteStruct::Size);
   case Intrinsic::cj_gcwrite_static_struct:
     return CI->getArgOperand(GCWriteStaticStruct::Size);

@@ -6785,6 +6785,7 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
   case Intrinsic::cj_gcread_static_struct:
   case Intrinsic::cj_gcwrite_ref:
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
   case Intrinsic::cj_gcwrite_static_ref:
   case Intrinsic::cj_gcwrite_static_struct:
   case Intrinsic::cj_array_copy_ref:

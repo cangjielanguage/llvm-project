@@ -380,6 +380,7 @@ private:
     case Intrinsic::cj_gcread_struct:
       return isa<AllocaInst>(Barrier->getArgOperand(1)->stripPointerCasts());
     case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct:
     case Intrinsic::cj_gcread_ref:
       return isa<AllocaInst>(Barrier->getArgOperand(0)->stripPointerCasts());
     case Intrinsic::cj_array_copy_ref:
@@ -454,6 +455,7 @@ private:
     case Intrinsic::cj_gcread_ref:
     // BaseObj, DstPtr, SrcPtr, Size
     case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct:
       BasePtr = Barrier->getArgOperand(0);
       FieldPtr = Barrier->getArgOperand(1);
       break;
@@ -591,7 +593,8 @@ private:
       }
     }
 
-    if (Barrier->getIntrinsicID() == Intrinsic::cj_gcwrite_struct) {
+    if (Barrier->getIntrinsicID() == Intrinsic::cj_gcwrite_struct ||
+        Barrier->getIntrinsicID() == Intrinsic::cj_maybe_local_write_struct) {
       auto Src = Barrier->getArgOperand(2)->stripPointerCasts();
       // 64 is 64-bit integer
       APInt Offset(DL.getIndexSizeInBits(0u), -1);
@@ -686,6 +689,7 @@ private:
           break;
         case Intrinsic::cj_gcwrite_ref:
         case Intrinsic::cj_gcwrite_struct:
+        case Intrinsic::cj_maybe_local_write_struct:
         case Intrinsic::cj_gcread_ref:
         case Intrinsic::cj_gcread_struct:
         case Intrinsic::cj_array_copy_ref:

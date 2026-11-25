@@ -65,6 +65,7 @@ using StdMap = std::unordered_map<KeyT, ValT>;
 const static StdMap<unsigned, StringRef> IntrinsicMap{
     {Intrinsic::cj_gcwrite_ref, "CJ_MCC_WriteRefField"},
     {Intrinsic::cj_gcwrite_struct, "CJ_MCC_WriteStructField"},
+    {Intrinsic::cj_maybe_local_write_struct, "CJ_MCC_MaybeLocalWriteStruct"},
     {Intrinsic::cj_gcwrite_static_ref, "CJ_MCC_WriteStaticRef"},
     {Intrinsic::cj_gcwrite_static_struct, "CJ_MCC_WriteStaticStruct"},
     {Intrinsic::cj_gcread_ref, "CJ_MCC_ReadRefField"},
@@ -140,7 +141,8 @@ public:
 
     Function *Callee = getOrInsertRuntimeFunc(II);
     switch (II->getIntrinsicID()) {
-    case Intrinsic::cj_gcwrite_struct: {
+    case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct: {
       Value *GCTib = getOrInsertGCTib(II);
       Value *Param[6] = {II->getArgOperand(GCWriteStruct::BaseObj),
                          II->getArgOperand(GCWriteStruct::Dst),
@@ -235,7 +237,8 @@ private:
     const Triple TT(II->getModule()->getTargetTriple());
     auto isARM = TT.isARM();
     switch (II->getIntrinsicID()) {
-    case Intrinsic::cj_gcwrite_struct: {
+    case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct: {
       Type *ParamType[6] = {GCPtr, GCPtr, I64, GCPtr, I64, I8Ptr};
       if (isARM)
         ParamType[2] = ParamType[4] = I32;
@@ -351,6 +354,8 @@ public:
     switch (IID) {
     // If Write barrier baseObj is null, we will replace to store.
     // Others, inline to fastbarrier.
+    // Note: cj_maybe_local_write_struct never reaches this switch; its registry write
+    // must not be replaced by a plain copy (see fastBarrierInline).
     case Intrinsic::cj_gcwrite_ref:
     case Intrinsic::cj_gcwrite_struct: {
       Value *BaseObj = getBaseObj(CI);
@@ -807,6 +812,20 @@ static bool fastBarrierInline(Function &F, GCPhaseCheck &GCPhase) {
           Changed |= GCPhase.fastBarrier(IID, CI);
         }
         continue;
+      case Intrinsic::cj_maybe_local_write_struct:
+        if (DisableGCSupport || EnableSafepointOnly) {
+          IRBuilder<> Builder(CI);
+          createStoreOrMems(CI, Builder);
+          CI->eraseFromParent();
+          Changed = true;
+        }
+        // Unlike the ordinary struct barrier, the maybe-local one must NOT take the
+        // GC-phase inline fast path: when the GC is idle, the fast path is a plain copy
+        // that would skip AddLocalRoot, but the registry entry is persistent state that
+        // every later GC cycle relies on. The runtime entry registers unconditionally,
+        // so the call must survive as-is (mirrors the ref/generic maybe-local barriers,
+        // which never enter this inline fast path either).
+        continue;
       case Intrinsic::cj_array_copy_ref:
       case Intrinsic::cj_array_copy_struct:
       case Intrinsic::cj_atomic_store:
@@ -857,6 +876,7 @@ static bool containBarrier(Loop &L, bool &containSafepoint) {
         BP = getPointerArg(CI);
         break;
       case Intrinsic::cj_gcwrite_struct:
+      case Intrinsic::cj_maybe_local_write_struct:
         BP = getBaseObj(CI);
         break;
       case Intrinsic::cj_gcwrite_static_struct:
@@ -1059,6 +1079,7 @@ bool CJBarrierLowering::isCJBarrier(Instruction *I) {
     return false;
   case Intrinsic::cj_gcwrite_ref:
   case Intrinsic::cj_gcwrite_struct:
+  case Intrinsic::cj_maybe_local_write_struct:
   case Intrinsic::cj_gcwrite_static_ref:
   case Intrinsic::cj_gcwrite_static_struct:
   case Intrinsic::cj_gcread_ref:

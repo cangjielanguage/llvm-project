@@ -132,6 +132,7 @@ MemoryLocation::getCJMemTransferSource(const IntrinsicInst *II) {
     case Intrinsic::cj_gcread_static_struct:
       return getForArgument(II, 1, nullptr);
     case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct:
     case Intrinsic::cj_gcread_struct:
       return getForArgument(II, 2, nullptr);
     default:
@@ -171,6 +172,7 @@ MemoryLocation::getForDest(const CallBase *CB, const TargetLibraryInfo &TLI) {
     case Intrinsic::cj_gcread_static_struct:
       return getForArgument(CB, 0, &TLI);
     case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct:
       return getForArgument(CB, 1, &TLI);
     default:
       break;
@@ -238,6 +240,7 @@ MemoryLocation MemoryLocation::getForArgument(const CallBase *Call,
       return MemoryLocation::getAfter(Arg, AATags);
 
     case Intrinsic::cj_gcwrite_struct:
+    case Intrinsic::cj_maybe_local_write_struct:
     case Intrinsic::cj_gcread_struct:
       assert((ArgIdx == 0 || ArgIdx == 1 || ArgIdx == 2) &&
              "Invalid argument index for cj.gcwrite.struct");

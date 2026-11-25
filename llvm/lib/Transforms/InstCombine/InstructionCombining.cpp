@@ -2805,6 +2805,7 @@ static bool isAllocSiteRemovable(Instruction *AI,
             Users.emplace_back(I);
             continue;
           case Intrinsic::cj_gcwrite_struct:
+          case Intrinsic::cj_maybe_local_write_struct:
           case Intrinsic::cj_gcwrite_generic:
             // PI is written to memory, it cannot be removed.
             if (II->getOperand(2) == PI)
